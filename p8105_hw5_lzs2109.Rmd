@@ -55,3 +55,20 @@ unsolved_murders = function(location) {
 unsolved_murders("Atlanta, GA")
 ```
 
+```{r}
+homicide_df %>% 
+  group_by(city_state, status) %>% 
+  count()
+```
+
+
+## Problem 2
+
+```{r}
+hw5_data = tibble(
+  files = list.files("data/hw5_data/")
+)
+
+#map(hw5_data$files, read_csv)
+```
+
