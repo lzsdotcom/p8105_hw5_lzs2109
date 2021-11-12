@@ -25,10 +25,11 @@ homicide_df %>%
   group_by(city_state, status) %>% 
   count()
 
-bmore = homicide_df %>% 
-  filter(city_state == "Baltimore, MD") %>%
-  group_by(status) %>% 
-  count()
+bmore = 
+  homicide_df %>%
+    filter(city_state == "Baltimore, MD") %>%
+    group_by(status) %>% 
+    count()
 bmore = prop.test(x = bmore$n[2], n = bmore$n[1] + bmore$n[2])
 bmore %>% 
   broom::tidy() %>% 
@@ -36,6 +37,21 @@ bmore %>%
 ```
 
 ```{r}
+unsolved_murders = function(location) {
+  
+  city = homicide_df %>% 
+           filter(city_state == location) %>%
+           group_by(status) %>% 
+           count()
+  
+  city = prop.test(x = city$n[2], n = city$n[1] + city$n[2])
+  
+  city %>% 
+    broom::tidy() %>% 
+    select(estimate, conf.low, conf.high)
+  
+}
 
+unsolved_murders("Atlanta, GA")
 ```
 
