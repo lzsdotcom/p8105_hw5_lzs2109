@@ -114,7 +114,7 @@ vec_num = c(3, 7, 23, NA, 74, NA, 52, NA, NA)
 na_replacer = function(vec) {
   
   if (is.character(vec)) {
-    vec = replace_na(vec, "watup")
+    vec = replace_na(vec, "virginica")
   } else if (is.numeric(vec)) {
     vec = replace_na(vec, mean(vec))
   }
