@@ -108,8 +108,8 @@ iris_with_missing = iris %>%
 Function that takes a vector and replaces missing values below.
 
 ```{r}
-vec_char = c("douglasiana", "innominata", "macrosiphon", NA, NA, "tenax", NA)
-vec_num = c(3, 7, 23, NA, 74, NA, 52, NA, NA)
+#vec_char = c("douglasiana", "innominata", "macrosiphon", NA, NA, "tenax", NA)
+#vec_num = c(3, 7, 23, NA, 74, NA, 52, NA, NA)
 
 na_replacer = function(vec) {
   
@@ -121,13 +121,19 @@ na_replacer = function(vec) {
   vec
 }
 
-na_replacer(vec_char) #testing function on character vector
-na_replacer(vec_num) #testing function on numeric vector 
+#na_replacer(vec_char) #testing function on character vector
+#na_replacer(vec_num) #testing function on numeric vector 
 ```
 
 Now map this function over the columns of iris_with_missing data frame.
 
 ```{r}
+iris_without_missing = 
+  map(iris_with_missing, na_replacer) %>% 
+  as.data.frame()
+head(iris_without_missing, 12)
 
+map(iris_with_missing, ~sum(is.na(.))) #check number of NAs before using map function
+map(iris_without_missing, ~sum(is.na(.))) # ..and after using map function
 ```
 
