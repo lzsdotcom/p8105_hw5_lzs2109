@@ -64,11 +64,16 @@ homicide_df %>%
 
 ## Problem 2
 
-```{r}
-hw5_data = tibble(
-  files = list.files("data/hw5_data/")
-)
-
-#map(hw5_data$files, read_csv)
+```{r, message = F}
+hw5_df = 
+  tibble(
+  filenames = list.files("data/hw5_data/"),
+  location = str_c("./data/hw5_data/", filenames),
+  data = map(location, read_csv)
+) %>% 
+  mutate(filenames = str_remove(filenames, ".csv$")) %>% 
+  rename(treatment = filenames) %>% 
+  unnest() %>% 
+  select(-location)
 ```
 
