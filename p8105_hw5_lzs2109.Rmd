@@ -105,10 +105,10 @@ iris_with_missing = iris %>%
   mutate(Species = as.character(Species))
 ```
 
-Function that takes a vector and replaces missing values below
+Function that takes a vector and replaces missing values below.
 
 ```{r}
-vec_char = c("hi", "hello", "maybe", NA, NA, "bye", NA)
+vec_char = c("douglasiana", "innominata", "macrosiphon", NA, NA, "tenax", NA)
 vec_num = c(3, 7, 23, NA, 74, NA, 52, NA, NA)
 
 na_replacer = function(vec) {
@@ -116,12 +116,18 @@ na_replacer = function(vec) {
   if (is.character(vec)) {
     vec = replace_na(vec, "virginica")
   } else if (is.numeric(vec)) {
-    vec = replace_na(vec, mean(vec))
+    vec = replace_na(vec, mean(vec, na.rm = TRUE))
   }
   vec
 }
 
-na_replacer(vec_char)
-na_replacer(vec_num)
+na_replacer(vec_char) #testing function on character vector
+na_replacer(vec_num) #testing function on numeric vector 
+```
+
+Now map this function over the columns of iris_with_missing data frame.
+
+```{r}
+
 ```
 
