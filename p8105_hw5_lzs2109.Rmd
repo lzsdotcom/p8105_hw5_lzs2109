@@ -64,7 +64,7 @@ homicide_df %>%
 
 ## Problem 2
 
-```{r, message = F}
+```{r, message = F, warning = F}
 hw5_df = 
   tibble(
   filenames = list.files("data/hw5_data/"),
@@ -74,6 +74,15 @@ hw5_df =
   mutate(filenames = str_remove(filenames, ".csv$")) %>% 
   rename(treatment = filenames) %>% 
   unnest() %>% 
-  select(-location)
+  select(-location) %>% 
+  pivot_longer(week_1:week_8, 
+               names_to = "week", 
+               names_prefix = "week_", 
+               values_to = "data_value") %>% 
+  mutate(week = as.numeric(week))
+
+hw5_df %>% 
+  ggplot(aes(x = week, y = data_value, color = treatment)) +
+  geom_line(alpha = 0.6)
 ```
 
