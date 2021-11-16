@@ -10,7 +10,7 @@ library(tidyverse)
 ```
 
 
-### **Problem 1**
+### Problem 1
 
 ```{r}
 homicide_df = read_csv("./data/homicide-data.csv") %>% 
@@ -29,14 +29,18 @@ bmore =
   homicide_df %>%
   filter(city_state == "Baltimore, MD") %>%
   group_by(status) %>% 
-  count()
+  count() %>% 
+  pivot_wider(names_from = "status", values_from = "n") %>% 
+  mutate(total = sum(solved, unsolved))
 
-bmore = prop.test(x = bmore$n[2], n = bmore$n[1] + bmore$n[2])
+bmore = prop.test(x = pull(bmore, unsolved), n = pull(bmore, total))
 
 bmore %>% 
   broom::tidy() %>% 
-  select(estimate, conf.low, conf.high)
+  select(estimate, starts_with("conf"))
 ```
+
+There's the Baltimore, MD proportion of unsolved homicides, along with lower and upper confidence intervals. We'll use that code above in a more general form to make a function that can calculate this with any city in the homicide_df dataframe below.
 
 ```{r}
 unsolved_murders = function(location) {
@@ -44,45 +48,44 @@ unsolved_murders = function(location) {
   city = homicide_df %>% 
            filter(city_state == location) %>%
            group_by(status) %>% 
-           count()
+           count() %>% 
+           pivot_wider(names_from = "status", values_from = "n") %>% 
+           mutate(total = sum(solved, unsolved))
   
-  city = prop.test(x = city$n[2], n = city$n[1] + city$n[2])
+  city = prop.test(x = pull(city, unsolved), n = pull(city, total))
   
   city %>% 
     broom::tidy() %>% 
-    select(estimate, conf.low, conf.high)
+    select(estimate, starts_with("conf"))
   
 }
 
-unsolved_murders("Atlanta, GA")
-unsolved_murders("San Francisco, CA")
+#unsolved_murders("Atlanta, GA")
+#unsolved_murders("San Francisco, CA")
 ```
 
+There's the function, with a couple of tests commented out just to make sure it works on any given city in the data set. Now that we've done that, we need a list of all the cities in the data set that have the appropriate data so that we can iterate over that list of cities and get the same info for all of them in one call. Instead of having a vector just hanging out, we can nest the original homicide_df. Also, we'll have to remove Tulsa, AL as it did not have appropriate data (1 solved, no unsolved) which broke the prop.test() function.
+
 ```{r}
-city_states = 
-  homicide_df %>% 
-  nest(cols = -city_state) %>% 
-  select(city_state) %>% 
-  filter(city_state != "Tulsa, AL") %>% 
-  pull()                                      
-  
-#had to remove Tulsa, AL as it did not have appropriate data (1 solved, no unsolved)
-
 unsolved_murders_df = 
-  tibble(
-    city_state = city_states,
-    prop_unsolved = map(city_state, unsolved_murders)
-  ) %>% 
-  unnest() %>% 
-  mutate(city_state = fct_reorder(city_state, estimate))
-
+  homicide_df %>% 
+  nest(homicide_data = -city_state) %>% 
+  filter(city_state != "Tulsa, AL") %>% 
+  mutate(prop_unsolved = map(city_state, unsolved_murders)) %>% 
+  select(-homicide_data) %>% 
+  unnest(prop_unsolved)
+  
 head(unsolved_murders_df)
 
 unsolved_murders_df %>% 
+  mutate(city_state = fct_reorder(city_state, estimate)) %>% 
   ggplot(aes(x = city_state, y = estimate, color = city_state)) +
   geom_point() +
   geom_errorbar(aes(x = city_state, ymin = conf.low, ymax = conf.high)) +
-  coord_flip() +
+  labs(title = "Proportion of Unsolved Murders by City and State",
+       x = "City and State",
+       y = "Proportion of Unsolved Murders") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   theme(legend.position = "none")
 ```
 
@@ -150,7 +153,7 @@ na_replacer = function(vec) {
 #na_replacer(vec_num) #testing function on numeric vector 
 ```
 
-Now map this function over the columns of iris_with_missing data frame.
+Some examples testing the function commented out in the above code chunk. Now we'll map this function over the columns of iris_with_missing data frame.
 
 ```{r}
 iris_without_missing = 
