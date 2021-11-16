@@ -13,7 +13,8 @@ library(tidyverse)
 ### Problem 1
 
 ```{r}
-homicide_df = read_csv("./data/homicide-data.csv") %>% 
+homicide_df = 
+  read_csv("./data/homicide-data.csv") %>% 
   mutate(city_state = str_c(city, state, sep = ", "),
          status = ifelse(disposition == "Closed by arrest", "solved", "unsolved"))
 ```
@@ -33,7 +34,8 @@ bmore =
   pivot_wider(names_from = "status", values_from = "n") %>% 
   mutate(total = sum(solved, unsolved))
 
-bmore = prop.test(x = pull(bmore, unsolved), n = pull(bmore, total))
+bmore = 
+  prop.test(x = pull(bmore, unsolved), n = pull(bmore, total))
 
 bmore %>% 
   broom::tidy() %>% 
@@ -45,14 +47,16 @@ There's the Baltimore, MD proportion of unsolved homicides, along with lower and
 ```{r}
 unsolved_murders = function(location) {
   
-  city = homicide_df %>% 
-           filter(city_state == location) %>%
-           group_by(status) %>% 
-           count() %>% 
-           pivot_wider(names_from = "status", values_from = "n") %>% 
-           mutate(total = sum(solved, unsolved))
+  city = 
+    homicide_df %>% 
+    filter(city_state == location) %>%
+    group_by(status) %>% 
+    count() %>% 
+    pivot_wider(names_from = "status", values_from = "n") %>% 
+    mutate(total = sum(solved, unsolved))
   
-  city = prop.test(x = pull(city, unsolved), n = pull(city, total))
+  city = 
+    prop.test(x = pull(city, unsolved), n = pull(city, total))
   
   city %>% 
     broom::tidy() %>% 
@@ -101,7 +105,7 @@ hw5_df =
   ) %>% 
   mutate(filenames = str_remove(filenames, ".csv$")) %>% 
   rename(treatment = filenames) %>% 
-  unnest() %>% 
+  unnest(data) %>% 
   pivot_longer(week_1:week_8, 
                names_to = "week", 
                names_prefix = "week_", 
@@ -111,14 +115,17 @@ hw5_df =
          subject_id = str_remove(treatment, "^con_"),
          subject_id = str_remove(subject_id, "^exp_")) %>% 
   select(treatment, subject_id, group, week, data_value)
-  
+
+head(hw5_df)
 
 hw5_df %>% 
   ggplot(aes(x = week, y = data_value, color = group)) +
-  geom_line(aes(group = treatment), alpha = 0.6)
+  geom_line(aes(group = treatment), alpha = 0.6) +
+  labs(x = "Week",
+       y = "Data Value")
 ```
 
-Based on the spaghetti plot, we can see that by the end of week 8, all subjects in the control arm have a lower data value than all subjects in the treatment group. If the treatment was meant to increase the data value, it appears to be effective in all subjects, including those that had lower starting data values than subjects in the control group.
+Based on the spaghetti plot, we can see that by the end of week 8, all subjects in the control arm have a lower data value than all subjects in the treatment group. If the treatment was meant to increase the data value, it appears to be effective in all subjects, including those that had lower starting data values than subjects in the control group. The starting (week 1) data values were not discernible between control and treatment groups but by the end of week 8, all control data values were below 2.5 while all treatment data values were above 2.5 with no exceptions.
 
 
 ## Problem 3
@@ -145,6 +152,7 @@ na_replacer = function(vec) {
     vec = replace_na(vec, mean(vec, na.rm = TRUE))
   }
   vec
+  
 }
 
 #na_replacer(vec_char) #testing function on character vector
@@ -155,8 +163,7 @@ Some examples testing the function commented out in the above code chunk. Now we
 
 ```{r}
 iris_without_missing = 
-  map(iris_with_missing, na_replacer) %>% 
-  as.data.frame()
+  map_df(iris_with_missing, na_replacer)
 
 head(iris_without_missing, 12)
 
