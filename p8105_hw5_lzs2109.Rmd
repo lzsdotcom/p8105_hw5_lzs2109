@@ -24,14 +24,16 @@ The raw data from homicide-data.csv contains the variables `r names(homicide_df)
 ```{r}
 homicide_df %>% 
   group_by(city_state, status) %>% 
-  count()
+  count() %>% 
+  pivot_wider(names_from = status, values_from = n) %>% 
+  mutate(total = solved + unsolved)
 
 bmore = 
   homicide_df %>%
   filter(city_state == "Baltimore, MD") %>%
   group_by(status) %>% 
   count() %>% 
-  pivot_wider(names_from = "status", values_from = "n") %>% 
+  pivot_wider(names_from = status, values_from = n) %>% 
   mutate(total = sum(solved, unsolved))
 
 bmore = 
@@ -52,7 +54,7 @@ unsolved_murders = function(location) {
     filter(city_state == location) %>%
     group_by(status) %>% 
     count() %>% 
-    pivot_wider(names_from = "status", values_from = "n") %>% 
+    pivot_wider(names_from = status, values_from = n) %>% 
     mutate(total = sum(solved, unsolved))
   
   city = 
