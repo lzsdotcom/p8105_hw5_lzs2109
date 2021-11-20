@@ -113,21 +113,22 @@ hw5_df =
                names_prefix = "week_", 
                values_to = "data_value") %>% 
   mutate(week = as.numeric(week),
-         group = ifelse(str_detect(treatment, "^con"), "control", "treatment"),
+         arm = ifelse(str_detect(treatment, "^con"), "control", "experimental"),
          subject_id = str_remove(treatment, "^con_"),
-         subject_id = str_remove(subject_id, "^exp_")) %>% 
-  select(treatment, subject_id, group, week, data_value)
+         subject_id = str_remove(subject_id, "^exp_"),
+         subject_id = as.numeric(subject_id)) %>% 
+  select(treatment, subject_id, arm, week, data_value)
 
 head(hw5_df)
 
 hw5_df %>% 
-  ggplot(aes(x = week, y = data_value, color = group)) +
+  ggplot(aes(x = week, y = data_value, color = arm)) +
   geom_line(aes(group = treatment), alpha = 0.6) +
   labs(x = "Week",
        y = "Data Value")
 ```
 
-Based on the spaghetti plot, we can see that by the end of week 8, all subjects in the control arm have a lower data value than all subjects in the treatment group. If the treatment was meant to increase the data value, it appears to be effective in all subjects, including those that had lower starting data values than subjects in the control group. The starting (week 1) data values were not discernible between control and treatment groups but by the end of week 8, all control data values were below 2.5 while all treatment data values were above 2.5 with no exceptions.
+Based on the spaghetti plot, we can see that by the end of week 8, all subjects in the control arm have a lower data value than all subjects in the experimental arm. If the experimental treatment was meant to increase the data value, it appears to be effective in all subjects, including those that had lower starting data values than subjects in the control arm. The starting (week 1) data values were not discernible between control and treatment groups but by the end of week 8, all control data values were below 2.5 while all treatment data values were above 2.5 with no exceptions. This separation did not occur in its entirety until some time between week 6 and week 7 of treatments.
 
 
 ## Problem 3
@@ -151,7 +152,7 @@ na_replacer = function(vec) {
   if (is.character(vec)) {
     vec = replace_na(vec, "virginica")
   } else if (is.numeric(vec)) {
-    vec = replace_na(vec, mean(vec, na.rm = TRUE))
+    vec = replace_na(vec, round(mean(vec, na.rm = TRUE), 1)) #round to match format of original
   }
   vec
   
